@@ -30,7 +30,7 @@ class Profile(models.Model):
 
 
     def get_absolute_url(self):
-        return reverse("profile-detail", args=[self.id, self.slug])
+        return reverse("main:profile-detail", args=[self.id, self.slug])
 
 
 class Post(models.Model):
@@ -65,4 +65,4 @@ class Post(models.Model):
 
 
     def get_absolute_url(self):
-        return reverse("post-detail", kwargs={"slug": self.slug})
+        return reverse("main:post-detail", kwargs={"slug": self.slug})
