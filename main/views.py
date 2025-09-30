@@ -8,7 +8,7 @@ class PostListView(ListView):
     model = Post
     template_name = 'main/site/post_list.html'
     context_object_name = 'posts'
-    # ordering = ['-date_posted']
+    ordering = ['-created_at']
 
 
 class PostDetailView(DetailView):

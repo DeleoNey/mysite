@@ -9,7 +9,7 @@
     <div class="card-body">
         <h2 class="card-title">{{ post.title }}</h2>
         <p class="text-muted">
-            👤 {{ post.author.username }} | {{ post.created_at|date:"d.m.Y H:i" }}
+            👤 {{ user.profile.name }} | {{ post.created_at|date:"H:i d.m.Y" }}
         </p>
         <p class="card-text">{{ post.content|linebreaks }}</p>
         <a href="{% url 'main:post-list' %}" class="btn btn-secondary mt-3">⬅ Назад до списку</a>
