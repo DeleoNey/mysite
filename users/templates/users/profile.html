@@ -1,0 +1,65 @@
+{% extends "main/base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-5">
+          <div class="text-center mb-4">
+            <div class="bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 90px; height: 90px; font-size: 2.5rem; font-weight: 600;">
+              {{ user.username|slice:":1"|upper }}
+            </div>
+            <h2 class="mb-2">{{ user.first_name}} {{user.last_name }}</h2>
+              <p class="text-muted mb-0">
+              <i class="bi bi-envelope"></i> {{ user.email }}
+            </p>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Мої пости</h4>
+            <span class="badge bg-primary rounded-pill">{{ user.post_set.count }}</span>
+          </div>
+
+          {% if user.post_set.all %}
+            <div class="list-group list-group-flush">
+              {% for post in user.post_set.all %}
+                <a href="{{ post.get_absolute_url }}" class="list-group-item list-group-item-action border rounded-3 mb-2 p-3 hover-shadow">
+                  <div class="d-flex w-100 justify-content-between align-items-center">
+                    <h6 class="mb-1 text-dark">{{ post.title }}</h6>
+                    <small class="text-muted">{{ post.created_at|date:"d.m.Y" }}</small>
+                  </div>
+                  {% if post.content %}
+                    <p class="mb-0 text-muted small mt-2">{{ post.content|truncatewords:15 }}</p>
+                  {% endif %}
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-light border rounded-3 text-center py-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-journal-text text-muted mb-3" viewBox="0 0 16 16">
+                <path d="M5 10.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+                <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
+              </svg>
+              <h5 class="text-muted">У вас поки немає постів</h5>
+              <p class="text-muted mb-0">Створіть свій перший пост, щоб він відобразився тут</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hover-shadow {
+    transition: all 0.3s ease;
+  }
+  .hover-shadow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+</style>
+{% endblock %}
