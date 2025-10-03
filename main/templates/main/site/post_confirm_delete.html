@@ -1,14 +1,33 @@
 {% extends "main/base.html" %}
-{% block title %}Видалення поста{% endblock %}
+{% block title %}Видалити пост{% endblock %}
 
 {% block content %}
-<div class="alert alert-danger">
-    <h4>Ви впевнені, що хочете видалити "{{ post.title }}"?</h4>
-    <form method="POST">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Так, видалити</button>
-        <a href="{{ post.get_absolute_url }}" class="btn btn-secondary">Скасувати</a>
-    </form>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded-4 border-danger">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <span style="font-size: 4rem;">⚠️</span>
+                    </div>
+                    <h2 class="mb-3">Видалити пост?</h2>
+                    <p class="text-muted mb-4">
+                        Ви впевнені, що хочете видалити пост <strong>"{{ post.title }}"</strong>?<br>
+                        Цю дію не можна буде скасувати.
+                    </p>
+
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg rounded-3 me-2">
+                            🗑️ Так, видалити
+                        </button>
+                    </form>
+                    <a href="{% url 'main:post-detail' post.slug %}" class="btn btn-secondary btn-lg rounded-3">
+                        Скасувати
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
-

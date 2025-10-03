@@ -5,14 +5,32 @@
     <div class="col-md-8">
       <div class="card shadow-lg border-0 rounded-4">
         <div class="card-body p-5">
-          <div class="text-center mb-4">
-            <div class="bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 90px; height: 90px; font-size: 2.5rem; font-weight: 600;">
-              {{ user.username|slice:":1"|upper }}
+          <div class="text-center mb-4 position-relative">
+            <!-- Аватарка (збільшена до 150x150) -->
+            <div class="d-inline-block position-relative mb-3">
+              <img src="{{ user.profile.avatar.url|default:'/media/avatars/default_avatar/default.jpg' }}"
+                   alt="{{ user.get_full_name }}"
+                   class="rounded-circle shadow"
+                   style="width: 150px; height: 150px; object-fit: cover; border: 5px solid #f8f9fa;">
+
+              <!-- Кнопка редагування (іконка камери на аватарці) -->
+              <a href="{% url 'users:profile-edit' %}"
+                 class="position-absolute bottom-0 end-0 btn btn-primary rounded-circle p-2 shadow"
+                 style="width: 45px; height: 45px; transform: translate(10%, 10%);"
+                 title="Редагувати профіль">
+                <i class="bi bi-camera-fill"></i>
+              </a>
             </div>
-            <h2 class="mb-2">{{ user.first_name}} {{user.last_name }}</h2>
-              <p class="text-muted mb-0">
+
+            <h2 class="mb-2">{{ user.first_name }} {{ user.last_name }}</h2>
+            <p class="text-muted mb-3">
               <i class="bi bi-envelope"></i> {{ user.email }}
             </p>
+
+            <!-- Кнопка редагування профілю (альтернативний варіант) -->
+            <a href="{% url 'users:profile-edit' %}" class="btn btn-outline-primary rounded-pill px-4">
+              <i class="bi bi-pencil-square"></i> Редагувати профіль
+            </a>
           </div>
 
           <hr class="my-4">
@@ -60,6 +78,12 @@
   .hover-shadow:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  /* Анімація для кнопки камери */
+  .btn.rounded-circle:hover {
+    transform: translate(10%, 10%) scale(1.1);
+    transition: transform 0.2s ease;
   }
 </style>
 {% endblock %}

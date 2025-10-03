@@ -1,9 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.generic import DetailView, ListView # for CBV
-
-from .models import Post
-from .forms import PostForm
+from django.views.generic.edit import FormMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse
+from django.utils.text import slugify
+from .models import Post, Comment
+from .forms import PostForm, CommentForm
+from django.contrib import messages
 # from django.shortcuts import render, get_object_or_404 # for FBV
 
 
@@ -15,12 +19,37 @@ class PostListView(ListView):
     ordering = ['-created_at']
 
 
-class PostDetailView(DetailView):
+class PostDetailView(FormMixin, DetailView):
     model = Post
     template_name = 'main/site/post_detail.html'
     context_object_name = 'post'
     slug_field = 'slug'
     slug_url_kwarg = 'slug'
+    form_class = CommentForm
+
+    def get_success_url(self):
+        return reverse('main:post-detail', kwargs={'slug': self.object.slug})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["comments"] = self.object.comments.all().order_by("-created_at")
+        context['form'] = self.get_form()
+        return context
+
+
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = self.object
+            comment.author = self.request.user
+            comment.save()
+            return super().form_valid(form)
+        else:
+            return self.form_invalid(form)
+
 
 
 # '''FBV - Function Based Views'''
@@ -39,6 +68,8 @@ def post_create(request):
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
+            if not post.slug:
+                post.slug = slugify(post.title)
             post.save()
             return redirect(post.get_absolute_url())
     else:
@@ -54,29 +85,34 @@ def post_update(request, slug):
     post = get_object_or_404(Post, slug=slug)
 
     if post.author != request.user:
+        messages.error(request, 'Ви не можете редагувати цей пост')
         return redirect(post.get_absolute_url())
 
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Пост оновлено')
             return redirect(post.get_absolute_url())
     else:
         form = PostForm(instance=post)
 
     return render(request, 'main/site/post_form.html',
-                  {'form': form, 'title': "Update Post"})
+                  {'form': form, 'post': post, 'title': "Update Post", 'is_edit': True})
 
 
 @login_required
 def post_delete(request, slug):
     post = get_object_or_404(Post, slug=slug)
 
-    if post.author != request.user:
+    if post.author != request.user and not request.user.is_superuser:
+        messages.error(request, 'Ви не можете видалити цей пост')
         return redirect(post.get_absolute_url())
 
     if request.method == 'POST':
         post.delete()
+        messages.success(request, 'Пост успішно видалено')
         return redirect('main:post-list')
+
     return render(request, 'main/site/post_confirm_delete.html',
                   {'post': post})

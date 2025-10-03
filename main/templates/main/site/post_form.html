@@ -1,14 +1,62 @@
 {% extends "main/base.html" %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{% if is_edit %}Редагувати пост{% else %}Створити пост{% endif %}{% endblock %}
 
 {% block content %}
-<div class="card shadow-sm p-4">
-    <h2>{{ title }}</h2>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Зберегти</button>
-        <a href="{% url 'main:post-list' %}" class="btn btn-secondary">Назад</a>
-    </form>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <h2 class="mb-4 text-center">
+                        {% if is_edit %}✏️ Редагувати пост{% else %}➕ Створити новий пост{% endif %}
+                    </h2>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label">Заголовок</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_content" class="form-label">Текст</label>
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                                <div class="text-danger small mt-1">{{ form.content.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_image" class="form-label">Зображення</label>
+                            {{ form.image }}
+                            {% if form.image.errors %}
+                                <div class="text-danger small mt-1">{{ form.image.errors }}</div>
+                            {% endif %}
+                            {% if is_edit and post.image %}
+                                <div class="mt-2">
+                                    <img src="{{ post.image.url }}" alt="Поточне зображення" class="img-thumbnail" style="max-width: 200px;">
+                                    <p class="text-muted small mt-1">Поточне зображення</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3">
+                                💾 {% if is_edit %}Зберегти зміни{% else %}Створити пост{% endif %}
+                            </button>
+                            <a href="{% if is_edit %}{% url 'main:post-detail' post.pk %}{% else %}{% url 'main:post-list' %}{% endif %}"
+                               class="btn btn-secondary rounded-3">
+                                Скасувати
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

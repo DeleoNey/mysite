@@ -1,0 +1,83 @@
+{% extends "main/base.html" %}
+{% block title %}Редагувати профіль{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <h2 class="mb-4 text-center">⚙️ Редагувати профіль</h2>
+
+                    <!-- Попередній перегляд аватарки -->
+                    <div class="text-center mb-4">
+                        <img src="{{ user.profile.avatar.url|default:'/media/avatars/default_avatar/default.jpg' }}"
+                             alt="avatar"
+                             class="rounded-circle mb-3 shadow"
+                             style="width:150px; height:150px; object-fit:cover; border: 5px solid #f8f9fa;"
+                             id="avatar-preview">
+                        <p class="text-muted">Поточне фото профілю</p>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="id_first_name" class="form-label">Ім'я</label>
+                            {{ user_form.first_name }}
+                            {% if user_form.first_name.errors %}
+                                <div class="text-danger small mt-1">{{ user_form.first_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_last_name" class="form-label">Прізвище</label>
+                            {{ user_form.last_name }}
+                            {% if user_form.last_name.errors %}
+                                <div class="text-danger small mt-1">{{ user_form.last_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Email</label>
+                            {{ user_form.email }}
+                            {% if user_form.email.errors %}
+                                <div class="text-danger small mt-1">{{ user_form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_avatar" class="form-label">Змінити фото профілю</label>
+                            {{ profile_form.avatar }}
+                            {% if profile_form.avatar.errors %}
+                                <div class="text-danger small mt-1">{{ profile_form.avatar.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted d-block mt-1">
+                                Підтримуються формати: JPG, PNG, GIF. Максимальний розмір: 5MB
+                            </small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3">
+                                💾 Зберегти зміни
+                            </button>
+                            <a href="{% url 'users:profile' %}" class="btn btn-secondary rounded-3">
+                                Скасувати
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
