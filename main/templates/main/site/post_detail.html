@@ -27,10 +27,36 @@
             {% endif %}
         </div>
 
-        <p class="card-text">{{ post.content|linebreaks }}</p>
+        <!-- Кнопка лайку з AJAX -->
+        {% if user.is_authenticated %}
+            {% with user_liked=post.likes.all|length %}
+                {% if user in post.likes.all %}
+                    <form class="like-form d-inline" data-url="{% url 'main:post-like' post.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger like-btn" data-liked="true">
+                            ❤️ <span class="likes-count">{{ post.total_likes }}</span>
+                        </button>
+                    </form>
+                {% else %}
+                    <form class="like-form d-inline" data-url="{% url 'main:post-like' post.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger like-btn" data-liked="false">
+                            ❤️ <span class="likes-count">{{ post.total_likes }}</span>
+                        </button>
+                    </form>
+                {% endif %}
+            {% endwith %}
+        {% else %}
+            <button class="btn btn-outline-danger" disabled>
+                ❤️ {{ post.total_likes }}
+            </button>
+        {% endif %}
+
+        <p class="card-text mt-3">{{ post.content|linebreaks }}</p>
         <a href="{% url 'main:post-list' %}" class="btn btn-secondary mt-3">⬅ Назад до списку</a>
     </div>
 </div>
+
 
 <!-- Коментарі -->
 <div class="card shadow-lg border-0 rounded-4 mb-4 mt-4">
@@ -57,6 +83,7 @@
     </div>
 </div>
 
+
 <!-- Форма додавання коментаря -->
 <div class="card shadow-lg border-0 rounded-4">
     <div class="card-body p-5">
@@ -77,4 +104,82 @@
         {% endif %}
     </div>
 </div>
+
+<!-- JavaScript для AJAX лайку -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const likeForm = document.querySelector('.like-form');
+
+    if (likeForm) {
+        likeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const url = this.dataset.url;
+            const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+            const likeBtn = this.querySelector('.like-btn');
+            const likesCount = this.querySelector('.likes-count');
+
+            // Блокуємо кнопку під час запиту
+            likeBtn.disabled = true;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response:', data); // Для дебагу
+
+                // Оновлюємо кількість лайків
+                likesCount.textContent = data.total_likes;
+
+                // Змінюємо стиль кнопки
+                if (data.liked) {
+                    likeBtn.classList.remove('btn-outline-danger');
+                    likeBtn.classList.add('btn-danger');
+                    likeBtn.dataset.liked = 'true';
+                } else {
+                    likeBtn.classList.remove('btn-danger');
+                    likeBtn.classList.add('btn-outline-danger');
+                    likeBtn.dataset.liked = 'false';
+                }
+
+                // Розблоковуємо кнопку
+                likeBtn.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Сталася помилка. Спробуйте ще раз.');
+                likeBtn.disabled = false;
+            });
+        });
+    }
+});
+</script>
+
+<!-- CSS для анімації -->
+<style>
+.like-btn {
+    transition: all 0.2s ease;
+    min-width: 70px;
+}
+
+.like-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+}
+
+.like-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+</style>
 {% endblock content %}

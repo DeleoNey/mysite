@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
-from django.utils.text import slugify
+# from django.utils.text import slugify
+from pytils.translit import slugify
 from django.contrib.auth.models import User
 
 
@@ -41,6 +42,8 @@ class Post(models.Model):
     image = models.ImageField(upload_to='post_images/', blank=True)
     slug = models.SlugField(unique=True, blank=True)
 
+    likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
+
 
     class Meta:
         ordering = ['-created_at']
@@ -63,6 +66,8 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+    def total_likes(self):
+        return self.likes.count()
 
     def get_absolute_url(self):
         return reverse("main:post-detail", kwargs={"slug": self.slug})

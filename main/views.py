@@ -1,13 +1,15 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.generic import DetailView, ListView # for CBV
 from django.views.generic.edit import FormMixin
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.utils.text import slugify
 from .models import Post, Comment
 from .forms import PostForm, CommentForm
 from django.contrib import messages
+from django.db.models import Q
+from django.http import JsonResponse
 # from django.shortcuts import render, get_object_or_404 # for FBV
 
 
@@ -18,6 +20,18 @@ class PostListView(ListView):
     context_object_name = 'posts'
     ordering = ['-created_at']
 
+
+    def get_queryset(self):
+        query = self.request.GET.get("q")
+        if query:
+            return Post.objects.filter(
+                Q(title__icontains=query) |
+                Q(content__icontains=query) |
+                Q(author__username__icontains=query) |
+                Q(author__first_name__icontains=query) |
+                Q(author__last_name__icontains=query)
+            ).order_by("-created_at")
+        return Post.objects.all().order_by("-created_at")
 
 class PostDetailView(FormMixin, DetailView):
     model = Post
@@ -35,7 +49,6 @@ class PostDetailView(FormMixin, DetailView):
         context["comments"] = self.object.comments.all().order_by("-created_at")
         context['form'] = self.get_form()
         return context
-
 
 
     def post(self, request, *args, **kwargs):
@@ -116,3 +129,22 @@ def post_delete(request, slug):
 
     return render(request, 'main/site/post_confirm_delete.html',
                   {'post': post})
+
+@login_required
+def post_like(request, slug):
+    post = get_object_or_404(Post, slug=slug)
+    user_liked = post.likes.filter(id=request.user.id).exists()
+
+    if user_liked:
+        post.likes.remove(request.user)
+        liked = False
+    else:
+        post.likes.add(request.user)
+        liked = True
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'liked': liked,
+            'total_likes': post.total_likes(),
+        })
+    return redirect(post.get_absolute_url())
