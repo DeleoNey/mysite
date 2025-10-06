@@ -52,7 +52,7 @@ class Post(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if not self.slug:
+        if not self.slug or (self.pk and Post.objects.get(pk=self.pk).title != self.title):
             base_slug = slugify(self.title)
             slug = base_slug
             counter = 1
