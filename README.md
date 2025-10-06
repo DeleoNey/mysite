@@ -160,7 +160,3 @@ Tests cover:
 
 * Ukrainian characters are transliterated to English using `pytils.translit`
 * Ensures uniqueness with a counter if the same slug already exists
-
-
-
-Do you want me to do that?
